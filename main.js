@@ -99,10 +99,10 @@ peer.on('call',call =>{
 
 $('#uluser').on('click','li',function(){
     const id = $(this).attr('id');
-  navigator.mediaDevices.getUserMedia({ audio: true, video: true })
+  navigator.mediaDevices.getUserMedia({ audio: false, video: true })
   .then(stream =>{
     playStream('localStream',stream)})
-	navigator.mediaDevices.getUserMedia({ audio: false, video: true })
+	navigator.mediaDevices.getUserMedia({ audio: true, video: true })
 	.then(stream1 =>{
     const call = peer.call(id,stream1)
     call.on('stream',remoteStream=>{playStream('remoteStream',remoteStream )})
