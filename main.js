@@ -103,8 +103,8 @@ $('#uluser').on('click','li',function(){
   .then(stream =>{
     playStream('localStream',stream)})
 	navigator.mediaDevices.getUserMedia({ audio: true, video: true })
-	.then(stream1 =>{
-    const call = peer.call(id,stream1)
+	.then(stream =>{
+    const call = peer.call(id,stream)
     call.on('stream',remoteStream=>{playStream('remoteStream',remoteStream )})
   })
 })
