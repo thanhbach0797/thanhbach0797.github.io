@@ -99,7 +99,7 @@ peer.on('call',call =>{
 
 $('#uluser').on('click','li',function(){
     const id = $(this).attr('id');
-  navigator.mediaDevices.getUserMedia({ audio: false, video: true })
+  navigator.mediaDevices.getUserMedia({ audio: true, video: true })
   .then(stream =>{
     playStream('localStream',stream)})
 	navigator.mediaDevices.getUserMedia({ audio: true, video: true })
