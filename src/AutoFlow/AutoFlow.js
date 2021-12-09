@@ -14,7 +14,29 @@ import { AiOutlineLeft, AiOutlineEdit } from "react-icons/ai";
 import ShowConfirmModal from './ConfimModal';
 import ShowSuccessModal from './SuccessModal';
 import ShowErrorModal from './ErrorModal';
-import { useNavigate } from 'react-router-dom';
+import ShowLoadding from './Loadding';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux'
+import { API } from '../api/index';
+import { store } from '../app/store';
+
+
+import * as cookie from '../cookie'
+
+console.log("234234324"+process.env.REACT_APP_IEMSESSIONID)
+if (process.env.REACT_APP_IEMSESSIONID) {
+    console.log(1)
+    cookie.setCookie('IEMSESSIONID', process.env.REACT_APP_IEMSESSIONID)
+}
+
+
+if (process.env.REACT_APP_IEM_SecureLogin) {
+    console.log(2)
+    cookie.setCookie('IEM_SecureLogin', process.env.REACT_APP_IEM_SecureLogin)
+}
+
+
+
 const nodeTypes = {
     nodeAddTrigger: NodeAddTrigger,
     customNode: CustomNode,
@@ -23,13 +45,19 @@ let onDragId;
 const onNodeDragStop = (event, node) => { onDragId = node.data.id };
 const onNodeDrag = (event, node) => console.log('drag stop', node.data.id);
 const onElementClick = (event, element) => console.log('click', element);
-
+let token = "";
+let dataMessage = "";
 const AutoFlow = () => {
-    const store = useStore();
+    const store2 = useStore();
+    const { search } = useLocation();
+    const parameter = React.useMemo(() => new URLSearchParams(search), [search]);
+    
+    let flowId = parameter.get("flowId");
+    
     const { zoomIn, zoomOut, setCenter } = useZoomPanHelper();
 
     const focusNode = (marginX, marginY, zoom) => {
-        const { nodes } = store.getState();
+        const { nodes } = store2.getState();
         if (nodes.length) {
             const node = nodes[nodes.length - 1];
 
@@ -47,11 +75,15 @@ const AutoFlow = () => {
         navigate("/")
     }
     document.title = "Zetamail - " + "AutoFlow - Test";
+
     const onClick = (id, type) => {
         switch (type) {
             case 1: // edit trigger
                 break;
             case 2:  // copy trigger
+                setTypeShowModal(type);
+                setConfirmModalShow(true)
+                break;
             case 3:  // fire trigger
             case 4:  // delete trigger
                 setTypeShowModal(type);
@@ -69,6 +101,7 @@ const AutoFlow = () => {
         if (onDragId == id) {
             onDragId = "";
         } else {
+            //bỏ
             // let data = {
             //     onClick: onClick,
             //     label: "CustomNode",
@@ -76,11 +109,34 @@ const AutoFlow = () => {
             //     showAction: false,
             //     typeIcon: 2,
             // }
-            let data = {};
-            let randomType = Math.floor(Math.random() * 7) + 1
-            data.typeIcon = randomType;
-            let position = { x: 0, y: 400 }
-            onAddNodeTriggerAct(id, data);
+            //bỏ
+
+            // let data = {};
+            // let randomType = Math.floor(Math.random() * 7) + 1
+            // data.typeIcon = randomType;
+            // let position = { x: 0, y: 400 }
+            // onAddNodeTriggerAct(id, data);
+
+            let iframe = document.createElement("iframe");
+            iframe.src = `http://localhost:3001`;
+            iframe.frameBorder = "0";
+            iframe.id = "iframe";
+            iframe.style.position = "absolute";
+            iframe.style.zIndex = "999";
+            iframe.style.height = "100%";
+            iframe.style.width = "100%";
+            iframe.style.top = "0";
+            iframe.style.backgroundColor = "white";
+            iframe.style.border = "none";
+            // var winOpen = window.open;
+            var win2 = window.open('http://localhost:3000/admin/index.php?Page=TriggerEmails&Action=Create&iframe=1', 'sharer', 'toolbar=0,status=0,width=700,height=700');
+            // win2.document.body.prepend(iframe);
+            // win2.document.body.style.overflow = "hidden";
+            // window.open = function() {
+            //     var win = winOpen.apply(this, arguments);
+            //     return win;
+            //  };
+
         }
     };
 
@@ -216,9 +272,39 @@ const AutoFlow = () => {
     const [ConfirmModalShow, setConfirmModalShow] = React.useState(false);
     const [SuccessModalShow, setSuccessModalShow] = React.useState(false);
     const [ErrorModalShow, setErrorModalShow] = React.useState(false);
+    const [loaddingShow, setloaddingShow] = React.useState(false);
     const [typeShowModal, setTypeShowModal] = React.useState(0);
+    
     const yPos = useRef(0);
     
+    const saveButton = () => {
+        setloaddingShow(true);
+        let request = {
+            token,
+            id: flowId,
+            title: flowName,
+            status: 1, 
+            description: "abc"
+
+        }
+        console.log(request);
+        API.updateFlowById(request).then((response) => {
+            setloaddingShow(false);
+            console.log(response)
+            dataMessage = response.data.message;
+            setTypeShowModal(0);
+            setSuccessModalShow(true);
+            // setListFlow(response.data.message.data);
+        })
+        .catch(err => {
+            console.log(err);
+            setloaddingShow(false);
+            dataMessage = err.message;
+            setErrorModalShow(true);
+        });
+        ;
+    }
+
     let [els, setEls] = useState([{}]);
     useEffect(()=>{
         const elsTemp = els.filter((els) => isNode(els));
@@ -232,8 +318,25 @@ const AutoFlow = () => {
     },[els]);
     useEffect(() => {
         setEls(initialElements);
+        token = store.getState().token;
+        setloaddingShow(true);
+        let request = {
+            token,
+            flowId
+        }
+        console.log(request);
+        API.getFlowById(request).then((response) => {
+            setloaddingShow(false);
+            console.log(response)
+            setFlowName(response.data.message.data.title);
+        })
+        .catch(err => {
+            console.log(err);
+            setloaddingShow(false);
+            dataMessage = err.message;
+            setErrorModalShow(true);
+        });
     }, []);
-    
 
     const addNode = useCallback(() => {
         setEls((els) => {
@@ -484,6 +587,8 @@ const AutoFlow = () => {
     const logToObject = () => console.log(rfInstance.toObject());
     const resetTransform = () => rfInstance.setTransform({ x: 0, y: 0, zoom: 1 });
     return (
+        <div>
+
         <ReactFlow
             elements={els}
             onLoad={onLoad}
@@ -518,7 +623,7 @@ const AutoFlow = () => {
                 <button className="btn btn-primary" style={{ marginRight: '5px' }} onClick={() => setConfirmModalShow(true)} >confirm</button>
                 <button className="btn btn-primary" style={{ marginRight: '5px' }} onClick={() => setSuccessModalShow(true)}>success</button>
                 <button className="btn btn-primary" style={{ marginRight: '5px' }} onClick={() => setErrorModalShow(true)} >error</button>
-                <button className="btn btn-outline-primary" style={{ marginRight: '5px' }} onClick={() => setConfirmModalShow(true)} >Lưu</button>
+                <button className="btn btn-outline-primary" style={{ marginRight: '5px' }} onClick={() => saveButton()} >Lưu</button>
                 <button className="btn btn-primary" style={{ width: '100px' }} onClick={(focusNode)}>Lưu và bắt đầu</button>
             </div>
             <ShowConfirmModal
@@ -533,14 +638,21 @@ const AutoFlow = () => {
             <ShowSuccessModal
                 show={SuccessModalShow}
                 onCancel={() => setSuccessModalShow(false)}
+                data = {dataMessage}
+                type={typeShowModal}
             />
             <ShowErrorModal
                 show={ErrorModalShow}
                 onCancel={() => setErrorModalShow(false)}
+                data = {dataMessage}
             />
             <MiniMap />
             <Controls />
         </ReactFlow>
+        <ShowLoadding
+            show={loaddingShow}
+        />
+        </div>
     );
 };
 

@@ -95,11 +95,11 @@ export default ({ data, selected }) => {
                     //     <button className="btn btn-danger" onClick={(event) => onClick(2)}><BsTrash/></button>
                     // </div>
                     <div className="actions">
-                        <a className="dropdown-item" onClick={(event) => data.onClick(data.id, 1)} href="#"><BsPencil /> Chỉnh sửa hành động</a>
-                        <a className="dropdown-item" onClick={(event) => data.onClick(data.id, 2)} href="#"><BsClipboard /> Sao chép hành động</a>
-                        <a className="dropdown-item" onClick={(event) => data.onClick(data.id, 3)} href="#"><BsCheck2Square /> Kíchh hoạt hành động</a>
+                        <a className="dropdown-item" onClick={(event) => data.onClick(data.id, 1)}><BsPencil /> Chỉnh sửa hành động</a>
+                        <a className="dropdown-item" onClick={(event) => data.onClick(data.id, 2)} ><BsClipboard /> Sao chép hành động</a>
+                        <a className="dropdown-item" onClick={(event) => data.onClick(data.id, 3)}><BsCheck2Square /> Kíchh hoạt hành động</a>
                         <div className="dropdown-divider" style={{ width: '100%' }}></div>
-                        <a className="dropdown-item" onClick={(event) => data.onClick(data.id, 4)} href="#"><BsTrash /> Xóa hành động</a>
+                        <a className="dropdown-item" onClick={(event) => data.onClick(data.id, 4)}><BsTrash /> Xóa hành động</a>
                     </div>
                     : null
                 }

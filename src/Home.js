@@ -1,32 +1,65 @@
-import React, { Component } from 'react';
 import './App.css';
 import { store } from './app/store';
-import { useSelector } from 'react-redux';
-const Home =()=> {
-    const listFlow = [
-        {
-            "id": "61a8cb451bdce65d6d23b7aa",
-            "user_id": "17574",
-            "title": "Flow_Test",
-            "status": "2",
-            "description": "description of auto flowdas",
-            "list": "",
-            "segment": "",
-            "created_at": "2021-12-02 20:33:57",
-            "updated_at": "2021-12-02 20:36:38"
-        }
-    ];
-    const token = useSelector(state => state.token);
-    // console.log(store.getState())
-    const requestOptions = {
-        method: 'GET',
-    };
-    fetch('https://app.zetamail.vn/api/autoflow/getall?token='+token+'&p=1&limit=50', requestOptions)
-        .then(response => response.json())
-        .then(data => {console.log(data);});
+import { useDispatch, useSelector } from 'react-redux'
+import React, { useCallback, useState, useRef, useEffect } from "react";
+import { API } from './api/index';
+const Home = () => {
+  // const listFlow = [
+  //     {
+  //         "id": "61a8cb451bdce65d6d23b7aa",
+  //         "user_id": "17574",
+  //         "title": "Flow_Test",
+  //         "status": "2",
+  //         "description": "description of auto flowdas",
+  //         "list": "",
+  //         "segment": "",
+  //         "created_at": "2021-12-02 20:33:57",
+  //         "updated_at": "2021-12-02 20:36:38"
+  //     }
+  // ];
+  const [listFlow, setListFlow] = React.useState([]);
+  let token = useSelector(state => state.token);
+  const dispatch = useDispatch();
+  
+  // console.log(store.getState())
+  const requestOptions = {
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    method: "POST",
+    body: JSON.stringify({
+        flowId: "61aece8466b9b519d810628c",
+        status: 1,
+        tile: "Autoflow 1224444",
+        token: "6b2dd421bc760e973e154f301cf2b5b404e195ba"
+      }
+    )
+  };
+  useEffect(() => {
+    
+    store.dispatch({
+      type: 'changeToken',
+      token: '6b2dd421bc760e973e154f301cf2b5b404e195ba'
+    });
+    // console.log("store");
+    // console.log(store.getState());
+    token = store.getState().token;
+    API.getAll(token).then((response) => {
+        console.log(response);
+        setListFlow(response.data.message.data);
+    });
+
+    // fetch('https://app.zetamail.vn/api/autoflow/update', requestOptions)
+    //     .then(response => response.json())
+    //     .then(data => {
+    //         console.log(data.message);
+    //         setListFlow(data.message.data);
+    //         });
+    }, [])
     document.title = "Zetamail - Home"
     return (
-        <div className="table-responsive">
+      <div className="table-responsive">
         <table className="table no-wrap user-table mb-0">
           <thead>
             <tr>
@@ -36,25 +69,25 @@ const Home =()=> {
             </tr>
           </thead>
           <tbody>
-            {listFlow.map((value, index)=>(
-                <tr key={index}>
+            {listFlow.map((value, index) => (
+              <tr key={index}>
                 <td className="pl-4">{index}</td>
                 <td>
-                    <a href={"/AutoFlow?node-id="+value.id}>{value.title}</a>
+                  <a href={process.env.PUBLIC_URL + "/#/AutoFlow?flowId=" + value.id}>{value.id}</a>
                 </td>
                 <td>
-                    <span className="text-muted">{value.description}</span>
+                  <span className="text-muted">{value.description}</span>
                 </td>
               </tr>
             ))}
-            
-            
+
+
           </tbody>
         </table>
-    </div>
+      </div>
     );
 
 
-}
+  }
 
 export default Home;

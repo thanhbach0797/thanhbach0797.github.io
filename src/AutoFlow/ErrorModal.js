@@ -3,6 +3,7 @@ import {
     BsXCircle
 } from "react-icons/bs";
 export default function ShowModal  (props) {
+    const message = props.data;
     return (
       <Modal
         {...props}
@@ -12,7 +13,7 @@ export default function ShowModal  (props) {
         className="modal-success"
       >
         <Modal.Header className="modal-header-success">
-          <div>
+          <div className="x-button">
             <button type="button" className="btn-close success" aria-label="Close" onClick={props.onCancel}></button>
           </div>
           <Modal.Title id="contained-modal-title-vcenter" className="modal-header-success-icon">
@@ -20,7 +21,7 @@ export default function ShowModal  (props) {
           </Modal.Title>
         </Modal.Header>
         <Modal.Body className="modal-body-success">
-          <p>Bạn không thể kích hoạt thành công hành động này.</p>
+          <p>{message}</p>
         </Modal.Body>
       </Modal> 
     );

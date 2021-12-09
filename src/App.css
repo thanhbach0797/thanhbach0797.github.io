@@ -190,6 +190,17 @@ input[type=text], input[type=text]:focus-visible
     border:none;
     border-bottom: 1px solid lightgray;
 }
+
+.x-button{
+  position: absolute;
+  top: 7px;
+  right: 12px;
+}
+a.success-link {
+  color: #0d6efd !important;
+  text-decoration: underline!important;
+  cursor: pointer;
+}
 @keyframes App-logo-float {
   0% {
     transform: translateY(0);
