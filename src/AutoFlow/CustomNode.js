@@ -76,7 +76,7 @@ export default ({ data, selected }) => {
                         <span style={{
                             'marginLeft': '5px',
                         }}>
-                            Giảm giá cho khách hàng quan tâm
+                            {data.name}
                         </span>
                     </div>
                     <div>

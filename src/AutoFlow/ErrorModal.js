@@ -2,7 +2,7 @@ import {Modal} from 'react-bootstrap';
 import { 
     BsXCircle
 } from "react-icons/bs";
-export default function ShowModal  (props) {
+export default function ShowErrorModal  (props) {
     const message = props.data;
     return (
       <Modal

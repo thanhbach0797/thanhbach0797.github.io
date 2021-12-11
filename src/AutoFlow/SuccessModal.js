@@ -4,7 +4,7 @@ import {
     BsCheckCircle
 } from "react-icons/bs";
 import React, { useEffect, useState } from 'react';
-export default function ShowModal  (props) {
+export default function ShowSuccessModal  (props) {
     const tilte = "Xác nhận";
     // const type = props.type == 1 ? "kích hoạt" : props.type == 2 ? "sao chép" : "xóa";
     const data = ["https://thanhbach0797.github.io/autoFlowTest", "https://thanhbach0797.github.io/autoFlowTest", "https://thanhbach0797.github.io/autoFlowTest", "https://thanhbach0797.github.io/autoFlowTest"];
@@ -16,7 +16,6 @@ export default function ShowModal  (props) {
     const message = props.data;
     const type = props.type;
     useEffect(()=>{
-      console.log(props)
       setViewMore(false);
     },[props]);
     return (

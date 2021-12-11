@@ -32,7 +32,7 @@ const Home = () => {
         flowId: "61aece8466b9b519d810628c",
         status: 1,
         tile: "Autoflow 1224444",
-        token: "6b2dd421bc760e973e154f301cf2b5b404e195ba"
+        token: "15e009885c84e521c7288c82cf7b3d3cddad3a22"
       }
     )
   };
@@ -40,7 +40,7 @@ const Home = () => {
     
     store.dispatch({
       type: 'changeToken',
-      token: '6b2dd421bc760e973e154f301cf2b5b404e195ba'
+      token: '15e009885c84e521c7288c82cf7b3d3cddad3a22'
     });
     // console.log("store");
     // console.log(store.getState());

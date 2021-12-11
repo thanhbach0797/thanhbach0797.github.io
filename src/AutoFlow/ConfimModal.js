@@ -2,7 +2,7 @@ import {Button, Modal} from 'react-bootstrap';
 import { 
     BsQuestionCircle
 } from "react-icons/bs";
-export default function ShowModal  (props) {
+export default function ShowConfirmModal  (props) {
     const tilte = props.typeTitle == 1 ? "Thông báo" : "Xác nhận";
     const type = props.type == 2 ? "sao chép" : props.type == 3 ? "kích hoạt" : "xóa";
     return (
@@ -22,7 +22,7 @@ export default function ShowModal  (props) {
           <h6>Bạn có chắc chắn muốn {type} hành động này?</h6>
         </Modal.Body>
         <Modal.Footer>
-            <Button onClick={props.onOk}>Đồng ý</Button>
+            <Button onClick={()=>{props.onOk(props.data.id, props.type)}}>Đồng ý</Button>
             <Button className="btn-danger" onClick={props.onCancel}>Hủy bỏ</Button>
         </Modal.Footer>
       </Modal>

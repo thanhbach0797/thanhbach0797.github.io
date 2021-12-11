@@ -2,7 +2,7 @@ import {Modal} from 'react-bootstrap';
 import { 
     BsXCircle
 } from "react-icons/bs";
-export default function ShowModal  (props) {
+export default function ShowLoadding  (props) {
     const style1 = {
         position: 'fixed',
         top: '0',

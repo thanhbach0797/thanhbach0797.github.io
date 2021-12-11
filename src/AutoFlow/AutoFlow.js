@@ -19,23 +19,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux'
 import { API } from '../api/index';
 import { store } from '../app/store';
-
-
-import * as cookie from '../cookie'
-
-console.log("234234324"+process.env.REACT_APP_IEMSESSIONID)
-if (process.env.REACT_APP_IEMSESSIONID) {
-    console.log(1)
-    cookie.setCookie('IEMSESSIONID', process.env.REACT_APP_IEMSESSIONID)
-}
-
-
-if (process.env.REACT_APP_IEM_SecureLogin) {
-    console.log(2)
-    cookie.setCookie('IEM_SecureLogin', process.env.REACT_APP_IEM_SecureLogin)
-}
-
-
+import * as cookie from '../cookie';
 
 const nodeTypes = {
     nodeAddTrigger: NodeAddTrigger,
@@ -47,12 +31,13 @@ const onNodeDrag = (event, node) => console.log('drag stop', node.data.id);
 const onElementClick = (event, element) => console.log('click', element);
 let token = "";
 let dataMessage = "";
+let flowId = "";
 const AutoFlow = () => {
     const store2 = useStore();
     const { search } = useLocation();
     const parameter = React.useMemo(() => new URLSearchParams(search), [search]);
     
-    let flowId = parameter.get("flowId");
+    flowId = parameter.get("flowId");
     
     const { zoomIn, zoomOut, setCenter } = useZoomPanHelper();
 
@@ -81,64 +66,132 @@ const AutoFlow = () => {
             case 1: // edit trigger
                 break;
             case 2:  // copy trigger
-                setTypeShowModal(type);
-                setConfirmModalShow(true)
-                break;
             case 3:  // fire trigger
             case 4:  // delete trigger
                 setTypeShowModal(type);
-                setConfirmModalShow(true)
+                setConfirmModalShow(true);
+                setDataTrigger({
+                    id
+                });
                 break;
         }
-        // if (type == 1) {
-        //     addNode()
-        // } else {
-        //     delectNode(id);
-        // }
     };
+
+    const aceptAction = (id, type) => {
+        switch (type) {
+            case 1: // edit trigger
+                break;
+            case 2:  // copy trigger
+                copyTrigger(id);
+                break;
+            case 3:  // fire trigger
+                activeTrigger(id);
+                break;
+            case 4:  // remove trigger
+                removeTrigger(id);
+                break;
+        }
+    };
+
+    const activeTrigger = (id) => {
+        setloaddingShow(true);
+        let request = {
+            token: token,
+            id: id
+        }
+        API.activeTrigger(request).then((response) => {
+            setloaddingShow(false);
+            dataMessage = response.data.message;
+            setTypeShowModal(0);
+            setSuccessModalShow(true);
+        })
+        .catch(err => {
+            setloaddingShow(false);
+            dataMessage = err.message;
+            setErrorModalShow(true);
+        });
+    }
+
+    const copyTrigger = (id) => {
+        setloaddingShow(true);
+        let request = {
+            token: token,
+            id: id
+        }
+        API.copyTrigger(request).then((response) => {
+            setloaddingShow(false);
+            dataMessage = response.data.message;
+            setTypeShowModal(0);
+            setSuccessModalShow(true);
+        })
+        .catch(err => {
+            setloaddingShow(false);
+            dataMessage = err.message;
+            setErrorModalShow(true);
+        });
+    }
+
+    const removeTrigger = (id) => {
+        setloaddingShow(true);
+        let request = {
+            token: token,
+            id: id
+        }
+        API.removeTrigger(request).then((response) => {
+            setloaddingShow(false);
+            dataMessage = response.data.message;
+            setTypeShowModal(0);
+            setSuccessModalShow(true);
+        })
+        .catch(err => {
+            console.log(err)
+            setloaddingShow(false);
+            dataMessage = err.message;
+            setErrorModalShow(true);
+        });
+    }
 
     const onAddNodeTrigger = async (id) => {
         if (onDragId == id) {
             onDragId = "";
         } else {
-            //bỏ
-            // let data = {
-            //     onClick: onClick,
-            //     label: "CustomNode",
-            //     id: "1",
-            //     showAction: false,
-            //     typeIcon: 2,
-            // }
-            //bỏ
-
-            // let data = {};
-            // let randomType = Math.floor(Math.random() * 7) + 1
-            // data.typeIcon = randomType;
-            // let position = { x: 0, y: 400 }
-            // onAddNodeTriggerAct(id, data);
-
-            let iframe = document.createElement("iframe");
-            iframe.src = `http://localhost:3001`;
-            iframe.frameBorder = "0";
-            iframe.id = "iframe";
-            iframe.style.position = "absolute";
-            iframe.style.zIndex = "999";
-            iframe.style.height = "100%";
-            iframe.style.width = "100%";
-            iframe.style.top = "0";
-            iframe.style.backgroundColor = "white";
-            iframe.style.border = "none";
-            // var winOpen = window.open;
-            var win2 = window.open('http://localhost:3000/admin/index.php?Page=TriggerEmails&Action=Create&iframe=1', 'sharer', 'toolbar=0,status=0,width=700,height=700');
-            // win2.document.body.prepend(iframe);
-            // win2.document.body.style.overflow = "hidden";
-            // window.open = function() {
-            //     var win = winOpen.apply(this, arguments);
-            //     return win;
-            //  };
-
+            cookie.setCookie('IEM_TriggerId',"");
+            var popup = window.open('http://localhost:3000/admin/index.php?Page=TriggerEmails&Action=Create&iframe=1&flowid='+flowId, 'sharer', 'toolbar=0,status=0,width=700,height=700');
+            var winMain = window;
+            popup.onunload = function() {
+                var win = popup.opener;
+                console.log("popup.closed" + popup.closed);
+                console.log("cookie.getCookie('IEM_TriggerId')" + cookie.getCookie('IEM_TriggerId'));
+                
+                if (popup.closed && !win.closed) {
+                    win.console.log(1111);
+                }
+            };
+            popup.onbeforeunload = function() {
+                winMain.console.log('Bye!');
+            }
         }
     };
+
+    const updateTrigger = (dataTrigger) => {
+        //bỏ
+        // let data = {
+        //     onClick: onClick,
+        //     label: "CustomNode",
+        //     id: "1",
+        //     showAction: false,
+        //     typeIcon: 2,
+        // }
+        //bỏ
+
+        let data = {};
+        let randomType = Math.floor(Math.random() * 7) + 1
+        data.typeIcon = dataTrigger.triggertype;
+        data.name = dataTrigger.name
+        data.triggeremailsid = dataTrigger.triggeremailsid
+        let position = { x: 0, y: 400 }
+        onAddNodeTriggerAct("0", data);
+    }
 
     const initialElements = [
         {
@@ -274,35 +327,32 @@ const AutoFlow = () => {
     const [ErrorModalShow, setErrorModalShow] = React.useState(false);
     const [loaddingShow, setloaddingShow] = React.useState(false);
     const [typeShowModal, setTypeShowModal] = React.useState(0);
-    
+    const [dataFlow, setDataFlow] = React.useState({});
+    const [dataTrigger, setDataTrigger] = React.useState({});
     const yPos = useRef(0);
     
-    const saveButton = () => {
+    const saveButton = (type) => {
         setloaddingShow(true);
         let request = {
             token,
             id: flowId,
             title: flowName,
-            status: 1, 
-            description: "abc"
-
+            status: type, 
+            description: dataFlow.description
         }
-        console.log(request);
         API.updateFlowById(request).then((response) => {
             setloaddingShow(false);
-            console.log(response)
             dataMessage = response.data.message;
             setTypeShowModal(0);
             setSuccessModalShow(true);
+            setEditFlowName(false);
             // setListFlow(response.data.message.data);
         })
         .catch(err => {
-            console.log(err);
             setloaddingShow(false);
             dataMessage = err.message;
             setErrorModalShow(true);
         });
-        ;
     }
 
     let [els, setEls] = useState([{}]);
@@ -321,14 +371,32 @@ const AutoFlow = () => {
         token = store.getState().token;
         setloaddingShow(true);
         let request = {
-            token,
-            flowId
+            token: token,
+            flowid: flowId
         }
-        console.log(request);
         API.getFlowById(request).then((response) => {
             setloaddingShow(false);
-            console.log(response)
             setFlowName(response.data.message.data.title);
+            setDataFlow(response.data.message.data);
+            getAllTrigger(request);
+        })
+        .catch(err => {
+            setloaddingShow(false);
+            dataMessage = err.message;
+            setErrorModalShow(true);
+        });
+    }, []);
+
+    const getAllTrigger = (request) => {
+        API.getAllTrigger(request).then((response) => {
+            setloaddingShow(false);
+            let requestTriggerById = {
+                token: token,
+                id: response.data.message.data['328'].triggeremailsid
+            };
+            getTriggerById(requestTriggerById);
+            // updateTrigger(response.data.message.data['328']);
+            // setListFlow(response.data.message.data);
         })
         .catch(err => {
             console.log(err);
@@ -336,8 +404,21 @@ const AutoFlow = () => {
             dataMessage = err.message;
             setErrorModalShow(true);
         });
-    }, []);
+    }
 
+    const getTriggerById = (request) => {
+        API.getTriggerById(request).then((response) => {
+            setloaddingShow(false);
+            updateTrigger(response.data.message.data);
+            // setListFlow(response.data.message.data);
+        })
+        .catch(err => {
+            console.log(err);
+            setloaddingShow(false);
+            dataMessage = err.message;
+            setErrorModalShow(true);
+        });
+    }
     const addNode = useCallback(() => {
         setEls((els) => {
             return [
@@ -372,14 +453,14 @@ const AutoFlow = () => {
         });
     }, []);
     const onAddNodeTriggerAct = useCallback((id, data) => {
-
-
         setEls((els) => {
             return els.map((el) => {
                 if (el.id == id) {
                     el.type = 'customNode';
                     el.data = {
                         ...el.data,
+                        id: data.triggeremailsid,
+                        name: data.name,
                         onClick: onClick,
                         typeIcon: data.typeIcon
                     }
@@ -620,20 +701,21 @@ const AutoFlow = () => {
                     change pos
                 </button>
                 <button onClick={logToObject}>toObject</button> */}
-                <button className="btn btn-primary" style={{ marginRight: '5px' }} onClick={() => setConfirmModalShow(true)} >confirm</button>
+                {/* <button className="btn btn-primary" style={{ marginRight: '5px' }} onClick={() => setConfirmModalShow(true)} >confirm</button>
                 <button className="btn btn-primary" style={{ marginRight: '5px' }} onClick={() => setSuccessModalShow(true)}>success</button>
-                <button className="btn btn-primary" style={{ marginRight: '5px' }} onClick={() => setErrorModalShow(true)} >error</button>
-                <button className="btn btn-outline-primary" style={{ marginRight: '5px' }} onClick={() => saveButton()} >Lưu</button>
-                <button className="btn btn-primary" style={{ width: '100px' }} onClick={(focusNode)}>Lưu và bắt đầu</button>
+                <button className="btn btn-primary" style={{ marginRight: '5px' }} onClick={() => setErrorModalShow(true)} >error</button> */}
+                <button className="btn btn-outline-primary" style={{ marginRight: '5px' }} onClick={() => saveButton(1)} >Lưu</button>
+                <button className="btn btn-primary" style={{ width: '100px' }} onClick={()=>{saveButton(3)}}>Lưu và bắt đầu</button>
             </div>
             <ShowConfirmModal
                 show={ConfirmModalShow}
                 onCancel={() => setConfirmModalShow(false)}
-                onOk={() => {
+                onOk={(id, type) => {
                     setConfirmModalShow(false);
-                    setSuccessModalShow(true)
+                    aceptAction(id, type);
                 }}
                 type={typeShowModal}
+                data={dataTrigger}
             />
             <ShowSuccessModal
                 show={SuccessModalShow}
